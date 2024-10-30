@@ -19,18 +19,16 @@ router.post("/user/signup", async (req, res) => {
 
     const existingEmail = await User.findOne({ email: req.body.email });
 
-    if (!username) {
-      return res.status(400).json({ message: "Missed username" });
+    if (!username || !email || !password) {
+      return res.status(400).json({ message: "Missing parameters" });
     }
     if (existingEmail) {
-      return res.status(409).json({ message: "Email already exist" });
+      return res.status(409).json({ message: "Email already used" });
     }
 
     const userSalt = uid2(16);
-    // console.log(userSalt);
 
     const userHash = SHA256(password + userSalt).toString(encBase64);
-    // console.log(userHash);
 
     const userToken = uid2(64);
 
@@ -47,11 +45,11 @@ router.post("/user/signup", async (req, res) => {
 
     await newUser.save();
 
-    const userDataToDisplay = await User.findOne(newUser).select(
-      "_id token account username"
-    );
-
-    res.json(userDataToDisplay);
+    res.status(201).json({
+      _id: newUser._id,
+      token: newUser.token,
+      account: newUser.account,
+    });
   } catch (error) {
     console.log(error);
     res.status(500).json({ message: error.message });
@@ -66,7 +64,7 @@ router.post("/user/login", async (req, res) => {
     const actualUser = await User.findOne({ email: userEmail });
 
     if (!actualUser) {
-      return res.status(401).json({ message: "wrong email" });
+      return res.status(400).json({ message: "wrong email or password" });
     }
 
     const actualUserHash = SHA256(userPassword + actualUser.salt).toString(
@@ -74,7 +72,7 @@ router.post("/user/login", async (req, res) => {
     );
 
     if (actualUserHash !== actualUser.hash) {
-      return res.status(401).json({ message: "Wrong password" });
+      return res.status(400).json({ message: "Wrong email or password" });
     }
 
     res.json({
