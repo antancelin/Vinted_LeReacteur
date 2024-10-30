@@ -1,5 +1,6 @@
 const express = require("express"); // import du package 'express'
 const mongoose = require("mongoose"); // import du package 'mongoose'
+const fileUpload = require("express-fileupload");
 const uid2 = require("uid2");
 const SHA256 = require("crypto-js/sha256");
 const encBase64 = require("crypto-js/enc-base64");
@@ -13,9 +14,11 @@ mongoose.connect("mongodb://localhost:27017/vinted"); // connexion/création de 
 
 // import des routes
 const userRouter = require("./routes/user");
+const offerRouter = require("./routes/offer");
 
 // chargement des routes
 app.use(userRouter);
+app.use(offerRouter);
 
 // gestion des mauvaises routes requêtées
 app.all("*", (req, res) => {
