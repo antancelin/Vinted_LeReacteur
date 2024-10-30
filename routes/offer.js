@@ -2,7 +2,6 @@
 const express = require("express");
 const fileUpload = require("express-fileupload");
 const cloudinary = require("cloudinary").v2;
-require("dotenv").config(); // va chercher mes variables dans mon '.env'
 
 // import des fonctions utiles
 const convertToBase64 = require("../utils/convertToBase64");
@@ -12,16 +11,9 @@ const isAuthenticated = require("../middleware/isAuthenticated");
 
 // import du modèle
 const Offer = require("../models/Offer");
-const User = require("../models/User");
+
 // utilisation du 'Router'
 const router = express.Router();
-
-// configuration de 'cloudinary'
-cloudinary.config({
-  cloud_name: process.env.CLOUD_NAME,
-  api_key: process.env.API_KEY,
-  api_secret: process.env.API_SECRET,
-});
 
 // CREATE => POST (création d'une annonce)
 router.post(
@@ -30,14 +22,14 @@ router.post(
   fileUpload(),
   async (req, res) => {
     try {
-      const user = req.user;
+      const convertedPicture = convertToBase64(req.files.picture); // conversion de l'image grâce à la fonction 'convertToBase64(file)'
 
-      const convertedPicture = convertToBase64(req.files.picture);
-
+      // envoi de l'image dans 'cloudinary', dans un dossiers 'offers', lui même placé dans un dossier 'vinted'
       const sentPicture = await cloudinary.uploader.upload(convertedPicture, {
         folder: "vinted/offers",
       });
 
+      // création de la nouvelle offre à enregistrer en base de données (MongoDB)
       const newOffer = new Offer({
         product_name: req.body.title,
         product_description: req.body.description,
@@ -59,17 +51,19 @@ router.post(
             EMPLACEMENT: req.body.city,
           },
         ],
-        product_image: sentPicture,
+        product_image: sentPicture, // envoi de l'objet de l'image, venant de 'cloudinary'
         owner: req.user,
       });
 
-      await newOffer.save();
+      await newOffer.save(); // envoi de la nouvelle offre complète en base de données (MongoDB)
+
+      // création de la variable permettant d'afficher les informations souhaitées dans la réponse
       const dataToDisplay = await Offer.find().populate(
         "owner",
         "account username, _id"
       );
 
-      res.json(dataToDisplay);
+      res.status(201).json(dataToDisplay);
     } catch (error) {
       console.log(error);
       res.status(500).json({ message: error.message });

@@ -1,9 +1,8 @@
-const express = require("express"); // import du package 'express'
-const mongoose = require("mongoose"); // import du package 'mongoose'
-const fileUpload = require("express-fileupload");
-const uid2 = require("uid2");
-const SHA256 = require("crypto-js/sha256");
-const encBase64 = require("crypto-js/enc-base64");
+// import des packages
+const express = require("express");
+const mongoose = require("mongoose");
+require("dotenv").config(); // va chercher mes variables dans mon '.env'
+const cloudinary = require("cloudinary").v2;
 
 const app = express(); // création du serveur
 const port = 3000; // port utilisé pour faire tourner le serveur
@@ -11,6 +10,13 @@ const port = 3000; // port utilisé pour faire tourner le serveur
 app.use(express.json()); // permet de lire les 'body' dans les requêtes
 
 mongoose.connect("mongodb://localhost:27017/vinted"); // connexion/création de la BDD
+
+// configuration de 'cloudinary'
+cloudinary.config({
+  cloud_name: process.env.CLOUD_NAME,
+  api_key: process.env.API_KEY,
+  api_secret: process.env.API_SECRET,
+});
 
 // import des routes
 const userRouter = require("./routes/user");
