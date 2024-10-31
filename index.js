@@ -21,10 +21,12 @@ cloudinary.config({
 // import des routes
 const userRouter = require("./routes/user");
 const offerRouter = require("./routes/offer");
+const offersRouter = require("./routes/offers");
 
 // chargement des routes
 app.use(userRouter);
 app.use(offerRouter);
+app.use(offersRouter);
 
 // gestion des mauvaises routes requêtées
 app.all("*", (req, res) => {

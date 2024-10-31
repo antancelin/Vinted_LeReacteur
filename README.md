@@ -181,3 +181,153 @@ module.exports = Offer;
   - description : 500 caractères
   - title : 50 caractères
   - price : 100000
+
+# 3ème étape : afficher en filtrant des annonces
+
+### Offers
+
+Service web qui permettra de récupérer un tableau contenant l'ensemble des annonces, ainsi que le nombre total d'annonces. Si des filtres sont passés à la route, le tableau retourné ne devra contenir que les annonces qui correspondent à la recherche et le nombre d'annonces trouvées.
+
+### Filters
+
+- URL : **http://localhost:3000/offers**
+- Méthode HTTP : **'GET'**
+- Paramètres **'Query'** :
+  - title : **String**
+  - priceMin : **Number**
+  - priceMax : **Number**
+  - sort : Valeurs possibles **"price-desc"**, **"price-asc"**
+  - page: **Number** (Si ce paramètre n'est pas transmis, il faudra forcer l'affichage de la première page. À vous de définir combien de résultats vous voulez afficher par page)
+
+### Exemples
+
+- Pour afficher la première page de résultats : **http://localhost:3000/offers?page=1**
+
+- Pour afficher la deuxième page de résultats : **http://localhost:3000/offers?page=2**
+
+- Pour chercher le titre pantalon : **http://localhost:3000/offers?title=pantalon**
+
+- Pour chercher le titre pantalon et un prix max de 200 : **http://localhost:3000/offers?title=pantalon&priceMax=200**
+
+- Pour chercher un prix compris entre 40 et 200 : **http://localhost:3000/offers?priceMin=40&priceMax=200**
+
+- Pour trier par prix décroissant : **http://localhost:3000/offers?sort=price-desc**
+
+- Pour trier par prix croissant : **http://localhost:3000/offers?sort=price-asc**
+
+- Pour chercher jupe et trier par prix croissant en même temps : **http://localhost:3000/offers?sort=price-asc&title=jupe**
+
+Exemple de réponse :
+
+```json
+{
+  "count": 20,
+  "offers": [
+    {
+      "product_details": [
+        {
+          "MARQUE": "ZARA"
+        },
+        {
+          "TAILLE": "39"
+        },
+        {
+          "ÉTAT": "TRÈS BON ÉTAT"
+        },
+        {
+          "COULEUR": "BORDEAUX"
+        },
+        {
+          "EMPLACEMENT": "BRUXELLES, BELGIQUE / BELGIË"
+        }
+      ],
+      "product_image": {
+        // ...
+        "secure_url": "https://res.cloudinary.com/lereacteur-apollo/image/upload/v1602491797/api/vinted/offers/5f84159433ef6e7461b4ded3/preview.jpg"
+        // ...
+      },
+      "_id": "5f84159433ef6e7461b4ded3",
+      "product_name": "Zara leather ankles boots",
+      "product_description": "worn a couple of times only",
+      "product_price": 30,
+      "owner": {
+        "account": {
+          "username": "Lionel.Andre32",
+          "avatar": {
+            "secure_url": "https://res.cloudinary.com/lereacteur-apollo/image/upload/v1602491686/api/vinted/users/5f84152533ef6e7461b4decc/avatar.jpg"
+          }
+        },
+        "_id": "5f84152533ef6e7461b4decc"
+      },
+      "__v": 0
+    },
+    {
+      // ...
+    },
+    {
+      // ...
+    }
+  ]
+}
+```
+
+### Offer
+
+Service web qui permettra de récupérer les détails concernant une annonce, en fonction de son **id**.
+
+⚠️ Cette route doit être placée après toutes les autres routes **/offer**
+
+- URL : **http://localhost:3000/offers/:id**
+- Méthode HTTP : **GET**
+
+Exemple de requête :
+
+**http://localhost:3000/offers/5f902e340bc98d4f6e4e94aa**
+
+Exemple de réponse :
+
+```json
+{
+  "product_details": [
+    {
+      "MARQUE": "Nike"
+    },
+    {
+      "TAILLE": "44"
+    },
+    {
+      "ÉTAT": "Neuf"
+    },
+    {
+      "COULEUR": "Blue"
+    },
+    {
+      "EMPLACEMENT": "Paris"
+    }
+  ],
+  "product_pictures": [],
+  "_id": "5f902e340bc98d4f6e4e94aa",
+  "product_name": "Nike Air Max 90",
+  "product_description": "Nike Air Max 90, très peu portées",
+  "product_price": 24,
+  "owner": {
+    "account": {
+      "username": "JohnDoe",
+      "avatar": {
+        // Les infos sur l'image de profil du user s'il en a une...
+        // ...
+        //
+        "secure_url": "https://res.cloudinary.com/lereacteur-apollo/image/upload/v1602491671/api/vinted/users/5f84151633ef6e7461b4debe/avatar.jpg"
+      }
+    },
+    "_id": "5f84151633ef6e7461b4debe"
+  },
+  "product_image": {
+    //
+    // ...
+    //
+    "secure_url": "https://res.cloudinary.com/lereacteur-apollo/image/upload/v1603284564/api/vinted/offers/5f902e340bc98d4f6e4e94aa/preview.jpg"
+  },
+  "__v": 0
+}
+```

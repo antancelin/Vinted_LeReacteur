@@ -24,11 +24,6 @@ router.post(
     try {
       const convertedPicture = convertToBase64(req.files.picture); // conversion de l'image grâce à la fonction 'convertToBase64(file)'
 
-      // envoi de l'image dans 'cloudinary', dans un dossiers 'offers', lui même placé dans un dossier 'vinted'
-      const sentPicture = await cloudinary.uploader.upload(convertedPicture, {
-        folder: "vinted/offers",
-      });
-
       // création de la nouvelle offre à enregistrer en base de données (MongoDB)
       const newOffer = new Offer({
         product_name: req.body.title,
@@ -51,14 +46,20 @@ router.post(
             EMPLACEMENT: req.body.city,
           },
         ],
-        product_image: sentPicture, // envoi de l'objet de l'image, venant de 'cloudinary'
         owner: req.user,
       });
+
+      // envoi de l'image dans 'cloudinary', dans un dossiers 'offers', lui même placé dans un dossier 'vinted'
+      const sentPicture = await cloudinary.uploader.upload(convertedPicture, {
+        folder: `vinted/offers/${newOffer._id}`,
+      });
+
+      newOffer.product_image = sentPicture;
 
       await newOffer.save(); // envoi de la nouvelle offre complète en base de données (MongoDB)
 
       // création de la variable permettant d'afficher les informations souhaitées dans la réponse
-      const dataToDisplay = await Offer.find().populate(
+      const dataToDisplay = await Offer.findOne({ _id: newOffer._id }).populate(
         "owner",
         "account username, _id"
       );
@@ -70,5 +71,19 @@ router.post(
     }
   }
 );
+
+// READ => GET (lire les infos du annonces en fonction de son 'id')
+router.get("/offer/:id", isAuthenticated, async (req, res) => {
+  try {
+    const offerId = req.params.id;
+
+    const offerToDisplay = await Offer.find({ _id: offerId }).populate("owner");
+
+    res.json(offerToDisplay);
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: error.message });
+  }
+});
 
 module.exports = router;
