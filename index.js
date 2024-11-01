@@ -1,15 +1,17 @@
 // import des packages
 const express = require("express");
 const mongoose = require("mongoose");
+const cors = require("cors");
 require("dotenv").config(); // va chercher mes variables dans mon '.env'
 const cloudinary = require("cloudinary").v2;
 
 const app = express(); // création du serveur
-const port = 3000; // port utilisé pour faire tourner le serveur
+const port = process.env.PORT; // port utilisé pour faire tourner le serveur
 
+app.use(cors());
 app.use(express.json()); // permet de lire les 'body' dans les requêtes
 
-mongoose.connect("mongodb://localhost:27017/vinted"); // connexion/création de la BDD
+mongoose.connect(process.env.MONGODB_URI); // connexion/création de la BDD
 
 // configuration de 'cloudinary'
 cloudinary.config({

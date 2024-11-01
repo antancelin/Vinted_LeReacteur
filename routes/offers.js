@@ -50,10 +50,10 @@ router.get("/offers", isAuthenticated, async (req, res) => {
       .skip(skip)
       .limit(limit);
 
-    const count = offers.length;
+    const totalCountOffers = (await Offer.find(filters)).length;
 
     res.json({
-      count: count,
+      count: totalCountOffers,
       offers: offers,
     });
   } catch (error) {
