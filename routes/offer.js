@@ -86,4 +86,27 @@ router.get("/offer/:id", isAuthenticated, async (req, res) => {
   }
 });
 
+// UPDATE => PUT (modifier une annonce si elle appartient à son créateur)
+router.put("/offer/:id", isAuthenticated, async (req, res) => {
+  try {
+    // console.log(req.params.id); // id offer : 6726a986ad3d66ad3f011f43
+    // console.log(req.user._id.toString()); // id user : 6726a89fad3d66ad3f011f40
+
+    const offerToUpdate = await Offer.findOne({ _id: req.params.id });
+    // console.log(offerToUpdate); // get offer
+    // console.log(offerToUpdate.owner.toString()); // id user link to offer : 6726a89fad3d66ad3f011f40
+
+    if (req.user._id.toString() !== offerToUpdate.owner.toString()) {
+      return res.status(401).json({ error: "Unauthorized" });
+    }
+
+    res.json({
+      message: "Ok ✅",
+    });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: error.message });
+  }
+});
+
 module.exports = router;
