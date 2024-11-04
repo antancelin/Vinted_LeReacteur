@@ -22,6 +22,22 @@ router.post(
   fileUpload(),
   async (req, res) => {
     try {
+      if (req.body.title.length > 50) {
+        return res
+          .status(400)
+          .json({ message: "Title must not exceed 50 characters" });
+      }
+
+      if (req.body.description.length > 500) {
+        return res
+          .status(400)
+          .json({ message: "Description must not exceed 500 characters" });
+      }
+
+      if (Number(req.body.price) > 10000) {
+        return res.status(400).json({ message: "Price must not exceed 10000" });
+      }
+
       const convertedPicture = convertToBase64(req.files.picture); // conversion de l'image grâce à la fonction 'convertToBase64(file)'
 
       // création de la nouvelle offre à enregistrer en base de données (MongoDB)
@@ -123,6 +139,36 @@ router.put("/offer/:id", isAuthenticated, fileUpload(), async (req, res) => {
     res.json({
       message: "Item updated",
       offerToUpdate,
+    });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: error.message });
+  }
+});
+
+// DELETE => DELETE (supprimer une annonce, uniquement pour le user qui en est l'auteur)
+router.delete("/offer/:id", isAuthenticated, async (req, res) => {
+  try {
+    const offerToDelete = await Offer.findById(req.params.id);
+
+    if (req.user._id.toString() !== offerToDelete.owner.toString()) {
+      return res.status(401).json({ error: "Unauthorized" });
+    }
+
+    if (!offerToDelete) {
+      return res.status(404).json({ message: "Event not found" });
+    }
+
+    // suppression ancienne image
+    if (offerToDelete.product_image && offerToDelete.product_image.public_id) {
+      await cloudinary.uploader.destroy(offerToDelete.product_image.public_id);
+    }
+
+    const deletedOffer = await Offer.findByIdAndDelete(req.params.id);
+
+    res.json({
+      message: "Offer deleted",
+      deletedOffer,
     });
   } catch (error) {
     console.log(error);

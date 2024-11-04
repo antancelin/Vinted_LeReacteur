@@ -2,16 +2,20 @@ const express = require("express");
 const uid2 = require("uid2");
 const SHA256 = require("crypto-js/sha256");
 const encBase64 = require("crypto-js/enc-base64");
+const cloudinary = require("cloudinary").v2;
 
 const User = require("../models/User");
+const fileUpload = require("express-fileupload");
+const convertToBase64 = require("../utils/convertToBase64");
+const isAuthenticated = require("../middleware/isAuthenticated");
 
 const router = express.Router();
 
-// CRUD
-
 // CREATE => POST (créer un user)
-router.post("/user/signup", async (req, res) => {
+router.post("/user/signup", fileUpload(), async (req, res) => {
   try {
+    const convertedAvatar = convertToBase64(req.files.avatar);
+
     const username = req.body.username;
     const email = req.body.email;
     const password = req.body.password;
@@ -42,6 +46,13 @@ router.post("/user/signup", async (req, res) => {
       hash: userHash,
       salt: userSalt,
     });
+
+    // // envoi de l'image dans 'cloudinary', dans un dossiers 'offers', lui même placé dans un dossier 'vinted'
+    const sentAvatar = await cloudinary.uploader.upload(convertedAvatar, {
+      folder: `vinted/users/${newUser._id}`,
+    });
+
+    newUser.account.avatar = sentAvatar;
 
     await newUser.save();
 
