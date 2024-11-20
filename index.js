@@ -30,6 +30,11 @@ app.use(userRouter);
 app.use(offerRouter);
 app.use(offersRouter);
 
+// route d'accueil
+app.get("/", (req, res) => {
+  res.status(200).json({ message: "Welcome to Vinted API 👗" });
+});
+
 // gestion des mauvaises routes requêtées
 app.all("*", (req, res) => {
   res.status(404).json({ message: "Route not found" });
