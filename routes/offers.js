@@ -11,7 +11,7 @@ const Offer = require("../models/Offer");
 const router = express.Router();
 
 // READ => GET
-router.get("/offers", isAuthenticated, async (req, res) => {
+router.get("/offers", async (req, res) => {
   try {
     const { title, priceMin, priceMax, sort, page } = req.query;
     const filters = {};
